@@ -1,0 +1,29 @@
+{
+	"name": "dora-metrics",
+	"version": "0.0.1",
+	"type": "module",
+	"dependencies": {
+		"axios": "^1.8.4",
+		"dotenv": "^16.4.7",
+		"json2csv": "^6.0.0-alpha.2"
+	},
+	"devDependencies": {
+		"@types/node": "^22.14.0"
+	},
+	"compilerOptions": {
+		"target": "es5",
+		"module": "commonjs",
+		"moduleResolution": "nodenext",
+		"baseUrl": "./",
+		"paths": {
+			"~/*": [
+				"./src/*"
+			]
+		},
+		"outDir": "dist",
+		"rootDir": "src"
+	},
+	"include": [
+		"src/**/*"
+	]
+}
