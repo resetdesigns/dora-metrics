@@ -1,7 +1,8 @@
+require('dotenv').config();
+
 const axios = require('axios');
 const { parse } = require('json2csv');
 const fs = require('fs');
-require('dotenv').config();
 
 const ORG = process.env.ADO_ORG || '';
 const PROJECT = process.env.ADO_PROJECT || '';
@@ -9,7 +10,13 @@ const PIPELINE_ID = process.env.ADO_PIPELINE_ID || '';
 const PAT = process.env.ADO_PAT || '';
 const API_URL = `https://dev.azure.com/${ORG}/${PROJECT}/_apis/pipelines/${PIPELINE_ID}/runs?api-version=7.1-preview.1`;
 
-const getAzureDevOpsMetrics = async () => {
+/**
+ * Pull metrics from Azure DevOps and build CSV
+ * ! Only supports one pipeline
+ *
+ * @param {*} callback
+ */
+const getAzureDevOpsMetrics = async (callback) => {
 	try {
 		const response = await axios.get(API_URL, {
 			headers: {
@@ -26,10 +33,10 @@ const getAzureDevOpsMetrics = async () => {
 
 		const csv = parse(pipelineData);
 		fs.writeFileSync('ado_pipelines.csv', csv);
-		console.log('Azure DevOps pipeline data saved to ado_pipelines.csv');
+		callback(undefined, { message: 'Azure DevOps pipeline data saved to ado_pipelines.csv' });
 	} catch (error) {
-		console.error('Error fetching Azure DevOps pipelines:', error.message);
+		callback(undefined, { message: `Error fetching Azure DevOps pipelines: ${error.message}` });
 	}
 };
 
-getAzureDevOpsMetrics();
+module.exports = getAzureDevOpsMetrics;

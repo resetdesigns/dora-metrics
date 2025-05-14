@@ -1,13 +1,20 @@
+require('dotenv').config();
+
 const axios = require('axios');
 const { parse } = require('json2csv');
 const fs = require('fs');
-require('dotenv').config();
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
-const REPO = 'org/repo'; // Replace with your actual GitHub org/repo
+const REPO = process.env.GITHUB_REPO;
 const API_URL = `https://api.github.com/repos/${REPO}/pulls?state=closed&per_page=100`;
 
-const getGithubMetrics = async () => {
+/**
+ * Pull metrics from Github and build CSV
+ * ! Only supports one repo
+ *
+ * @param {*} callback
+ */
+const getGithubMetrics = async (callback) => {
 	try {
 		const response = await axios.get(API_URL, {
 			headers: { Authorization: `token ${GITHUB_TOKEN}` },
@@ -26,10 +33,11 @@ const getGithubMetrics = async () => {
 
 		const csv = parse(prData);
 		fs.writeFileSync('github_prs.csv', csv);
-		console.log('GitHub PR data saved to github_prs.csv');
+
+		callback(undefined, { message: 'GitHub PR data saved to github_prs.csv' });
 	} catch (error) {
-		console.error('Error fetching GitHub PRs:', error.message);
+		callback(undefined, { message: `Error fetching GitHub PRs: ${error.message}` });
 	}
 };
 
-getGithubMetrics();
+module.exports = getGithubMetrics;

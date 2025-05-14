@@ -1,15 +1,22 @@
+require('dotenv').config();
+
 const axios = require('axios');
 const { parse } = require('json2csv');
 const fs = require('fs');
-require('dotenv').config();
 
 const JIRA_URL = process.env.JIRA_URL || '';
 const JIRA_EMAIL = process.env.JIRA_EMAIL || '';
 const JIRA_TOKEN = process.env.JIRA_TOKEN || '';
-const PROJECT = 'ABC'; // Replace with your Jira project key
+const PROJECT = process.env.JIRA_PROJECT_KEY;
 const API_URL = `${JIRA_URL}/rest/api/3/search?jql=project=${PROJECT}&fields=summary,status,created,resolutiondate,customfield_10004&maxResults=100`;
 
-const getJiraMetrics = async () => {
+/**
+ * Pull metrics from Jira and build CSV
+ * ! Only supports one project
+ *
+ * @param {*} callback
+ */
+const getJiraMetrics = async (callback) => {
 	try {
 		const response = await axios.get(API_URL, {
 			headers: {
@@ -28,10 +35,10 @@ const getJiraMetrics = async () => {
 
 		const csv = parse(issuesData);
 		fs.writeFileSync('jira_issues.csv', csv);
-		console.log('Jira issues data saved to jira_issues.csv');
+		callback(undefined, { message: 'Jira issues data saved to jira_issues.csv' });
 	} catch (error) {
-		console.error('Error fetching Jira issues:', error.message);
+		callback(undefined, { message: `Error fetching GitHub PRs: ${error.message}` });
 	}
 };
 
-getJiraMetrics();
+module.exports = getJiraMetrics;
